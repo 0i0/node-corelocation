@@ -2,6 +2,7 @@
 #import <CoreLocation/CoreLocation.h>
 #include <node.h>
 
+// https://raw.github.com/evanphx/lost/master/ext/lost/core_loc.m
 using namespace v8;
 
 @interface LLHolder : NSObject {
@@ -20,9 +21,8 @@ using namespace v8;
     - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error;
     @end
 
-    @implementation LLHolder
-
-    - (void)reset {
+@implementation LLHolder
+- (void)reset {
     worked = 0;
 }
 
@@ -49,7 +49,7 @@ using namespace v8;
         NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
         [self logLonLat:newLocation];
         [pool drain];
-    }
+}
 
 - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {
     latitude = 0.0;
@@ -61,91 +61,52 @@ using namespace v8;
 id g_lm = nil;
 
 int int_coreloc_enable() {
-    if ([CLLocationManager locationServicesEnabled]) {
-        g_lm = [[CLLocationManager alloc] init];
-        return 1;
-    }
-    return 0;
+  if ([CLLocationManager locationServicesEnabled]) {
+		g_lm = [[CLLocationManager alloc] init];
+    return 1;
+  }
+  return 0;
 }
 
 int int_coreloc_get(double* lat, double* log) {
-    LLHolder* obj = [[LLHolder alloc] init];
-    [g_lm setDelegate:obj];
-    [g_lm startUpdatingLocation];
+  LLHolder* obj = [[LLHolder alloc] init];
+	[g_lm setDelegate:obj];
+	[g_lm startUpdatingLocation];
 
-    CFRunLoopRun();
+  CFRunLoopRun();
 
-    [g_lm stopUpdatingLocation];
+  [g_lm stopUpdatingLocation];
 
-    if([obj useData] == 1) {
-        [obj latitude: lat longitude: log];
-        [obj release];
-        return 1;
-    }
-
+  if([obj useData] == 1) {
+    [obj latitude: lat longitude: log];
     [obj release];
-    return 0;
+    return 1;
+  }
+
+  [obj release];
+  return 0;
 }
 
-// int main(int ac,char *av[])
-// {
-//     id obj = [[NSObject alloc] init];
-//     id lm = nil;
-//     if ([CLLocationManager locationServicesEnabled]) {
-//         printf("location service enabled\n");
-//         lm = [[CLLocationManager alloc] init];
-//         [lm setDelegate:obj];
-//         [lm startUpdatingLocation];
-//     }
-//     CFRunLoopRun();
-//     [lm release];
-//     [obj release];
-//     return 0;
-// }
-
-// This function returns a JavaScript number that is either 0 or 1.
 Handle<Value> GetLocation(const Arguments& args) {
-    // At the top of every function that uses anything about v8, include a
-    // definition like this. It ensures that any v8 handles you create in that
-    // function are properly cleaned up. If you see memory rising in your
-    // application, chances are that a scope isn't properly cleaned up.
     HandleScope scope;
 
-
-    id obj = [[NSObject alloc] init];
-    id lm = nil;
-    if ([CLLocationManager locationServicesEnabled]) {
-        printf("location service enabled\n");
-        lm = [[CLLocationManager alloc] init];
-        [lm setDelegate:obj];
-        [lm startUpdatingLocation];
+    double lat, log;
+    if (!int_coreloc_enable()) {
+        return scope.Close(Null());
     }
-    CFRunLoopRun();
-    [lm release];
-    [obj release];
-
-
-    // When returning a value from a function, make sure to wrap it in
-    // scope.Close(). This ensures that the handle stays valid after the current
-    // scope (declared with the previous statement) is cleaned up.
-    return scope.Close(
-        // Creating a new JavaScript integer is as simple as passing a C int
-        // (technically a int32_t) to this function.
-        Integer::New(rand() % 2)
-    );
+    if (!int_coreloc_get(&lat, &log)) {
+        return scope.Close(Null());
+    } else {
+        Local<Array> arr(Array::New(2));
+        arr->Set(0, Number::New(lat));
+        arr->Set(1, Number::New(log));
+        return scope.Close(arr);
+    }
 }
 
 void RegisterModule(v8::Handle<v8::Object> target) {
-    // You can add properties to the module in this function. It is called
-    // when the module is required by node.
-    srand(time(NULL));
-
-    // target is the module object you see when require()ing the .node file.
     target->Set(String::NewSymbol("getLocation"),
         FunctionTemplate::New(GetLocation)->GetFunction());
 }
 
-// Register the module with node. Note that "modulename" must be the same as
-// the basename of the resulting .node file. You can specify that name in
-// binding.gyp ("target_name"). When you change it there, change it here too.
 NODE_MODULE(node_corelocation, RegisterModule);
