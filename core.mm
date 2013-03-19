@@ -98,8 +98,8 @@ Handle<Value> GetLocation(const Arguments& args) {
         return scope.Close(Null());
     } else {
         Local<Array> arr(Array::New(2));
-        arr->Set(0, Number::New(lat));
-        arr->Set(1, Number::New(log));
+        arr->Set(0, Number::New(log));
+        arr->Set(1, Number::New(lat));
         return scope.Close(arr);
     }
 }
