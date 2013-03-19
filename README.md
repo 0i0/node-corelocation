@@ -1,6 +1,7 @@
 ## node-corelocation
 
-get your computer's location.
+Get your computer's location, via the CoreLocation framework. Only
+compatible with OSX.
 
 ```js
 var cl = require('corelocation');

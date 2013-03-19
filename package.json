@@ -1,14 +1,14 @@
 {
-  "name": "node-corelocation",
+  "name": "corelocation",
   "version": "0.0.0",
   "description": "ERROR: No README.md file found!",
-  "main": "index.js",
+  "main": "build/Release/node_corelocation",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "install": "node-gyp rebuild"
   },
-  "repository": "",
-  "author": "",
-  "license": "BSD",
+  "repository": "git@github.com:tmcw/node-corelocation.git",
+  "author": "Tom MacWright <tom@macwright.org>",
+  "license": "MIT",
   "gypfile": true
 }
