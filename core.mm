@@ -66,7 +66,7 @@ id g_lm = nil;
 
 int int_coreloc_enable() {
   if ([CLLocationManager locationServicesEnabled]) {
-    g_lm = [[CLLocationManager alloc] init];
+        g_lm = [[CLLocationManager alloc] init];
     return 1;
   }
   return 0;
@@ -74,8 +74,8 @@ int int_coreloc_enable() {
 
 int int_coreloc_get(double* lat, double* log) {
   LLHolder* obj = [[LLHolder alloc] init];
-  [g_lm setDelegate:obj];
-  [g_lm startUpdatingLocation];
+    [g_lm setDelegate:obj];
+    [g_lm startUpdatingLocation];
 
   CFRunLoopRun();
 
@@ -91,6 +91,12 @@ int int_coreloc_get(double* lat, double* log) {
   return 0;
 }
 
+
+// v8::Handle<v8::Value> GetLocation(const v8::internal::Arguments& args) {
+//     HandleScope scope;
+
+
+// }
 
 void GetLocation(const FunctionCallbackInfo<Value>& args) {
     Isolate* isolate = Isolate::GetCurrent();
@@ -113,11 +119,6 @@ void GetLocation(const FunctionCallbackInfo<Value>& args) {
 }
 
 void Init(v8::Handle<Object> exports) {
-    NODE_SET_METHOD(exports, "getLocation", GetLocation);
-}
-
-NODE_MODULE(node_corelocation, Init);
- exports) {
     NODE_SET_METHOD(exports, "getLocation", GetLocation);
 }
 
