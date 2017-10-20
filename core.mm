@@ -16,9 +16,13 @@ using namespace v8;
 - (void)latitude:(double*)lat longitude:(double*)log;
 
 - (void)logLonLat:(CLLocation*)location;
+
 - (void)locationManager:(CLLocationManager *)manager
-    didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation;
-    - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error;
+    didUpdateToLocation:(CLLocation *)newLocation 
+           fromLocation:(CLLocation *)oldLocation;
+
+- (void)locationManager:(CLLocationManager *)manager 
+       didFailWithError:(NSError *)error;
     @end
 
 @implementation LLHolder
@@ -62,7 +66,7 @@ id g_lm = nil;
 
 int int_coreloc_enable() {
   if ([CLLocationManager locationServicesEnabled]) {
-		g_lm = [[CLLocationManager alloc] init];
+    g_lm = [[CLLocationManager alloc] init];
     return 1;
   }
   return 0;
@@ -70,8 +74,8 @@ int int_coreloc_enable() {
 
 int int_coreloc_get(double* lat, double* log) {
   LLHolder* obj = [[LLHolder alloc] init];
-	[g_lm setDelegate:obj];
-	[g_lm startUpdatingLocation];
+  [g_lm setDelegate:obj];
+  [g_lm startUpdatingLocation];
 
   CFRunLoopRun();
 
@@ -87,26 +91,34 @@ int int_coreloc_get(double* lat, double* log) {
   return 0;
 }
 
-Handle<Value> GetLocation(const Arguments& args) {
-    HandleScope scope;
 
+void GetLocation(const FunctionCallbackInfo<Value>& args) {
+    Isolate* isolate = Isolate::GetCurrent();
+    HandleScope scope(isolate);
     double lat, log;
     if (!int_coreloc_enable()) {
-        return scope.Close(Null());
+        isolate->ThrowException(Exception::TypeError(
+        String::NewFromUtf8(isolate, "CoreLocation Not Enabled")));
+        return;
     }
     if (!int_coreloc_get(&lat, &log)) {
-        return scope.Close(Null());
-    } else {
-        Local<Array> arr(Array::New(2));
-        arr->Set(0, Number::New(log));
-        arr->Set(1, Number::New(lat));
-        return scope.Close(arr);
+        args.GetReturnValue().Set(Undefined(isolate));
+        return;
     }
+
+    Handle<Array> arr = Array::New(isolate, 2);
+    arr->Set(0, Number::New(isolate, log));
+    arr->Set(1, Number::New(isolate, lat));
+    args.GetReturnValue().Set(arr);
 }
 
-void RegisterModule(v8::Handle<v8::Object> target) {
-    target->Set(String::NewSymbol("getLocation"),
-        FunctionTemplate::New(GetLocation)->GetFunction());
+void Init(v8::Handle<Object> exports) {
+    NODE_SET_METHOD(exports, "getLocation", GetLocation);
 }
 
-NODE_MODULE(node_corelocation, RegisterModule);
+NODE_MODULE(node_corelocation, Init);
+ exports) {
+    NODE_SET_METHOD(exports, "getLocation", GetLocation);
+}
+
+NODE_MODULE(node_corelocation, Init);
