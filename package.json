@@ -7,8 +7,18 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "install": "node-gyp rebuild"
   },
-  "repository": "git@github.com:tmcw/node-corelocation.git",
+  "repository": "git@github.com:0i0/node-corelocation.git",
   "author": "Tom MacWright <tom@macwright.org>",
+  "contributors": [
+    {
+      "name": "Tom MacWright",
+      "email": "tom@macwright.org"
+    },
+    {
+      "name": "Lior Hakim",
+      "email": "liorhakim@gmail.com"
+    }
+  ]
   "license": "MIT",
   "gypfile": true
 }
