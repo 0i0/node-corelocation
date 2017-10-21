@@ -1,6 +1,6 @@
 {
   "name": "corelocation",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "ERROR: No README.md file found!",
   "main": "build/Release/node_corelocation",
   "scripts": {
